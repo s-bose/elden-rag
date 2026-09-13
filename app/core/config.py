@@ -14,6 +14,8 @@ class Settings(BaseSettings):
     )
     scraper_rate_limit: str = Field("30/m")
     scraper_run_ttl_seconds: int = Field(60 * 60 * 24 * 3)
+    embedding_model_id: str = Field("BAAI/bge-small-en-v1.5")
+    api_base_url: str = Field("http://localhost:8000")
 
 
     model_config = SettingsConfigDict(

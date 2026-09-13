@@ -31,5 +31,18 @@ class RedisClient:
     def remove_from_set(self, key: str, value: str) -> None:
         self._client.srem(key, value)
 
+    def incr(self, key: str, ttl: int | None = None) -> int:
+        value = int(self._client.incr(key))
+        if ttl is not None:
+            self._client.expire(key, ttl)
+        return value
+
+    def decr(self, key: str) -> int:
+        return int(self._client.decr(key))
+
+    def get_int(self, key: str) -> int:
+        value = self._client.get(key)
+        return int(cast(str, value)) if value is not None else 0
+
 
 redis_client = RedisClient()

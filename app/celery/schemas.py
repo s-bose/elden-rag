@@ -17,3 +17,13 @@ class DiscoveryResult(BaseModel):
     source_url: str
     depth: int
     links_found: int
+
+
+class RunStatus(BaseModel):
+    run_id: str
+    categories: list[ScraperCategory]
+    discovered: int
+    scraped: int
+    failed: int
+    pending_tasks: int
+    complete: bool
