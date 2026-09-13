@@ -6,7 +6,6 @@ from app.core.config import settings
 app = Celery(
     "elden_rag",
     broker=settings.redis_url,
-    backend=settings.redis_url,
     include=["app.celery.tasks"],
 )
 
@@ -15,12 +14,9 @@ app.conf.update(
     worker_max_tasks_per_child=100,
     task_acks_late=True,
     task_reject_on_worker_lost=True,
-    result_expires=60 * 60,
+    task_ignore_result=True,
     task_time_limit=120,
     task_soft_time_limit=90,
-    task_serializer="pickle",
-    result_serializer="pickle",
-    accept_content=["pickle", "json"],
     task_routes={
         "app.celery.tasks.discover_category": {"queue": "discovery"},
         "app.celery.tasks.scrape_page": {"queue": "scraping"},

@@ -11,11 +11,31 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tarnished -d tarnished"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   redis:
     image: redis:7-alpine
     ports:
       - "6379:6379"
+
+  migrate:
+    image: postgres:16-alpine
+    environment:
+      PGHOST: postgres
+      PGUSER: tarnished
+      PGPASSWORD: tarnished
+      PGDATABASE: tarnished
+    volumes:
+      - ./db/migrate.sh:/migrate.sh:ro
+      - ./db/migrations:/migrations:ro
+    command: ["sh", "/migrate.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   api:
     build: .
@@ -27,8 +47,12 @@ services:
       API_BASE_URL: http://api:8000
       HF_TOKEN: ${HF_TOKEN}
     depends_on:
-      - redis
-      - postgres
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
 
   worker:
     build: .
@@ -39,9 +63,14 @@ services:
       API_BASE_URL: http://api:8000
       HF_TOKEN: ${HF_TOKEN}
     depends_on:
-      - redis
-      - postgres
-      - api
+      redis:
+        condition: service_started
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+      api:
+        condition: service_started
 
 volumes:
   pgdata:
