@@ -17,5 +17,31 @@ services:
     ports:
       - "6379:6379"
 
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      POSTGRES_HOST: postgres
+      API_BASE_URL: http://api:8000
+      HF_TOKEN: ${HF_TOKEN}
+    depends_on:
+      - redis
+      - postgres
+
+  worker:
+    build: .
+    command: celery -A app.celery.celery_app worker -Q discovery,scraping -c 2
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      POSTGRES_HOST: postgres
+      API_BASE_URL: http://api:8000
+      HF_TOKEN: ${HF_TOKEN}
+    depends_on:
+      - redis
+      - postgres
+      - api
+
 volumes:
   pgdata:

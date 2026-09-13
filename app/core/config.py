@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     scraper_user_agent: str = Field(
         "Mozilla/5.0 (compatible; EldenRagBot/0.1; local research project)"
     )
+
+    hf_token: str | None = Field(None)
     scraper_rate_limit: str = Field("30/m")
     scraper_run_ttl_seconds: int = Field(60 * 60 * 24 * 3)
     embedding_model_id: str = Field("BAAI/bge-small-en-v1.5")
